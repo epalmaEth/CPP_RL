@@ -1,0 +1,14 @@
+services:
+  cpp_rl:
+    image: cpp_rl:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile  # Update to point to the correct Dockerfile location
+    volumes:
+      - ../:/workspace
+    entrypoint: ["/workspace/docker/entrypoint.sh"]
+    stdin_open: true
+    tty: true
+    runtime: nvidia
+    user: "epalma"
+
