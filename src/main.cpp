@@ -43,8 +43,8 @@ int main() {
     std::cout << "-------Ending Simulation-------" << std::endl;
     env->close();
 
-    std::cout << "-------Exporting states-------" << std::endl;
-    env->export_data(data);
+    std::cout << "-------Rendering-------" << std::endl;
+    env->render(data);
     
     return 0;
 }

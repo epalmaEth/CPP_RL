@@ -77,5 +77,6 @@ ani = animation.FuncAnimation(fig, update, frames=len(theta), init_func=init, bl
 writer = animation.FFMpegWriter(fps=30, metadata=dict(artist='Me'), bitrate=1800)
 
 # Save the animation as a video file
+print("-------Saving Video-------")
 ani.save('videos/pendulum/pendulum_motion.mp4', writer=writer)
 

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 namespace env {
 
@@ -44,7 +45,10 @@ namespace env {
         data["rewards"].push_back(this->step_result_.reward.clone().to(torch::kCPU));
     }
 
-    void PendulumEnv::export_data(const DictListTensor& data) const {
+    void PendulumEnv::render(const DictListTensor& data) const {
+
+        // Create directories if they do not exist
+        std::filesystem::create_directories("data/pendulum");
         // Open a file for writing the state values
         std::ofstream file("data/pendulum/data.csv");
 
@@ -72,6 +76,11 @@ namespace env {
 
         // Close the file
         file.close();
+
+        // Running python script
+        std::string command = "python3 python/pendulum_plot.py";
+        std::filesystem::create_directories("videos/pendulum");
+        std::system(command.c_str());
     }
 
     void PendulumEnv::sample_state_(const Tensor& indices) {

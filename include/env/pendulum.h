@@ -22,7 +22,7 @@ namespace env {
         int get_action_size() const override { return 1; }
         Tensor sample_action() const override;
         void update_render_data(DictListTensor& data) const override;
-        void export_data(const DictListTensor& data) const override;
+        void render(const DictListTensor& data) const override;
 
     private:
         void sample_state_(const Tensor& indices) override;

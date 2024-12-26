@@ -33,7 +33,7 @@ namespace env {
         virtual int get_action_size() const = 0;
         virtual Tensor sample_action() const = 0;
         virtual void update_render_data(DictListTensor& data) const = 0;
-        virtual void export_data(const DictListTensor& data) const = 0;
+        virtual void render(const DictListTensor& data) const = 0;
 
         std::pair<Tensor, DictTensor> reset(int seed, const Tensor& indices) {
             torch::manual_seed(seed);
