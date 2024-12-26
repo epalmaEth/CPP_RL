@@ -17,17 +17,18 @@ namespace env {
         ~PendulumEnv() override = default;
 
         void initialize_states() override;
-        std::pair<Tensor, TensorDict> reset(const Tensor& indices) override;
-        void render() const override;
+        std::pair<Tensor, DictTensor> reset(const Tensor& indices) override;
         void close() override;
         int get_action_size() const override { return 1; }
-        Tensor sample_action() override;
+        Tensor sample_action() const override;
+        void update_render_data(DictListTensor& data) const override;
+        void export_data(const DictListTensor& data) const override;
 
     private:
         void sample_state_(const Tensor& indices) override;
         void update_state_(const Tensor& action) override;
         void compute_observations_() override;
-        void compute_reward_(const Tensor& action) override;
+        void compute_reward_() override;
         void compute_terminated_() override;
         void compute_truncated_() override;
         void compute_info_() override;
@@ -45,6 +46,8 @@ namespace env {
         float g_ = 10.F;
         float m_ = 1.F;
         float l_ = 1.F;
+
+        Tensor applied_torque_;
     };
 } // namespace env
 

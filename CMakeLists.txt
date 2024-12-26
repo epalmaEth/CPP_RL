@@ -25,10 +25,14 @@ include_directories(/third_party/eigen-master/Eigen)
 include_directories(include)
 
 # Collect all source files in src/env/ directory (including pendulum.cpp)
-file(GLOB SOURCES "src/env/*.cpp")
+file(GLOB 
+    SOURCES 
+    "src/main.cpp"
+    "src/env/*.cpp"
+)
 
 # Add the executable and all source files
-add_executable(cpp_rl src/main.cpp ${SOURCES})
+add_executable(cpp_rl ${SOURCES})
 
 # Link third-party libraries
 target_link_libraries(cpp_rl "${TORCH_LIBRARIES}")
