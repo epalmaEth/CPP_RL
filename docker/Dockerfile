@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     vim \
     ssh \
     gdb \
+    ffmpeg \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install a compatible GCC version (11 for LIBTorch with CUDA 11.8)
@@ -58,6 +59,9 @@ RUN cd /third_party && \
     wget https://gitlab.com/libeigen/eigen/-/archive/master/eigen-master.tar.gz && \
     tar -xvzf eigen-master.tar.gz && \
     rm eigen-master.tar.gz
+
+# Install Python packages
+RUN pip3 install numpy matplotlib
 
 # Set default working directory
 WORKDIR /workspace

@@ -6,7 +6,7 @@ services:
       dockerfile: docker/Dockerfile  # Update to point to the correct Dockerfile location
     volumes:
       - ../:/workspace
-    entrypoint: ["/workspace/docker/entrypoint.sh"]
+    # entrypoint: ["/workspace/docker/entrypoint.sh"]
     stdin_open: true
     tty: true
     runtime: nvidia

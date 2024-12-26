@@ -4,9 +4,10 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 # Project name
 project(CPP_RL)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+# Set C++ standard globally (preferably C++17)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 # Set debug build
 set(CMAKE_BUILD_TYPE Debug)
@@ -16,18 +17,22 @@ set(Torch_DIR /third_party/libtorch/share/cmake/Torch)
 
 # Find the Torch package
 find_package(Torch REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 # Set the path to Eigen headers (Eigen is header-only)
 include_directories(/third_party/eigen-master/Eigen)
 
-# Add your source files here
-add_executable(cpp_rl src/main.cpp)
+# Add include directories for your project
+include_directories(include)
+
+# Collect all source files in src/env/ directory (including pendulum.cpp)
+file(GLOB SOURCES "src/env/*.cpp")
+
+# Add the executable and all source files
+add_executable(cpp_rl src/main.cpp ${SOURCES})
 
 # Link third-party libraries
 target_link_libraries(cpp_rl "${TORCH_LIBRARIES}")
 
-set_property(TARGET cpp_rl PROPERTY CXX_STANDARD 17)
 
 
 
