@@ -8,10 +8,13 @@
 #include "utils/types.h"
 
 int main() {
+
+    // Disable gradients
+    torch::NoGradGuard no_grad;
     
     utils::register_eval_tasks();
 
-    std::string task = "pendulum";
+    string task = "pendulum";
     std::cout << "Task: " << task << std::endl;
 
     const Device device = torch::cuda::is_available() ? torch::kCUDA : torch::kCPU;

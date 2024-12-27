@@ -4,12 +4,19 @@
 #include <map>
 #include <string>
 
+// Standard types
+using string = std::string;
+
 // LibTorch types
 using Tensor = torch::Tensor;
 using Device = torch::Device;
-using ListTensor = std::vector<torch::Tensor>;
-using DictTensor = std::map<std::string, Tensor>;
-using DictListTensor = std::map<std::string, std::vector<torch::Tensor>>;
+using ListTensor = std::vector<Tensor>;
+using DictTensor = std::map<string, Tensor>;
+using DictListTensor = std::map<string, ListTensor>;
+
+// NN types
+using NNModule = torch::nn::Module;
+using MLP = torch::nn::Sequential;
 
 // Env types
 struct StepResult {

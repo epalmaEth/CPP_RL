@@ -1,5 +1,6 @@
 #include "env/pendulum.h"
 
+#include <torch/torch.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -36,7 +37,7 @@ namespace env {
     }
 
     Tensor PendulumEnv::sample_action() const {
-        return this->max_action_*(2*torch::rand({this->num_envs_, this->get_action_size()}).to(this->device_) - 1);
+        return this->max_action_*(2.*torch::rand({this->num_envs_, this->get_action_size()}).to(this->device_) - 1);
     }
 
     void PendulumEnv::update_render_data(DictListTensor& data) const {
@@ -61,9 +62,9 @@ namespace env {
 
         // Export the states, actions, and rewards for each time step or iteration
         for (size_t i = 0; i < states.size(); ++i) {
-            const torch::Tensor& state = states[i];
-            const torch::Tensor& action = actions[i];
-            const torch::Tensor& reward = rewards[i];
+            const Tensor& state = states[i];
+            const Tensor& action = actions[i];
+            const Tensor& reward = rewards[i];
 
             const float theta = state[0][0].item<float>();  // Assuming state is [theta, theta_dot]
             const float theta_dot = state[0][1].item<float>();
@@ -78,15 +79,15 @@ namespace env {
         file.close();
 
         // Running python script
-        std::string command = "python3 python/pendulum_plot.py";
+        string command = "python3 python/pendulum_plot.py";
         std::filesystem::create_directories("videos/pendulum");
         std::system(command.c_str());
     }
 
     void PendulumEnv::sample_state_(const Tensor& indices) {
         // Sample random states for each environment
-        const Tensor& theta = this->max_theta_init_*(2*torch::rand({indices.numel()}).to(this->device_) - 1);  
-        const Tensor& theta_dot = this->max_theta_dot_init_*(2*torch::rand({indices.numel()}).to(this->device_) - 1);  
+        const Tensor& theta = this->max_theta_init_*(2.*torch::rand({indices.numel()}).to(this->device_) - 1);  
+        const Tensor& theta_dot = this->max_theta_dot_init_*(2.*torch::rand({indices.numel()}).to(this->device_) - 1);  
 
         this->state_.index_put_({indices, 0}, theta);
         this->state_.index_put_({indices, 1}, theta_dot);
@@ -97,7 +98,7 @@ namespace env {
         Tensor theta_dot = this->state_.index({this->all_indices_, 1});
         this->applied_torque_.index_put_({this->all_indices_}, torch::clamp(action.index({this->all_indices_, 0}), -this->max_action_, this->max_action_));
 
-        theta_dot += 3.F*this->dt_*(this->g_/(2.F*this->l_)*torch::sin(theta) + 1.F/(this->m_*this->l_*this->l_)*this->applied_torque_);
+        theta_dot += 3.*this->dt_*(this->g_/(2.*this->l_)*torch::sin(theta) + 1./(this->m_*this->l_*this->l_)*this->applied_torque_);
         theta_dot = torch::clamp(theta_dot, -this->max_theta_dot_, this->max_theta_dot_);
         theta += this->dt_*theta_dot;
 
@@ -115,9 +116,9 @@ namespace env {
 
     void PendulumEnv::compute_reward_() {
         // Compute the reward
-        const Tensor& theta_error = this->normalized_theta_().pow(2);
-        const Tensor& theta_dot_error = this->state_.index({this->all_indices_, 1}).pow(2);
-        const Tensor& torque_error = this->applied_torque_.pow(2);
+        const Tensor& theta_error = this->normalized_theta_().square();
+        const Tensor& theta_dot_error = this->state_.index({this->all_indices_, 1}).square();
+        const Tensor& torque_error = this->applied_torque_.square();
         this->step_result_.reward.index_put_({this->all_indices_}, -(theta_error + 0.1F*theta_dot_error + 0.001F*torque_error));
     }
 
@@ -135,7 +136,7 @@ namespace env {
 
     Tensor PendulumEnv::normalized_theta_() const {
         const Tensor& theta = this->state_.index({this->all_indices_, 0});
-        return torch::remainder(theta + M_PI, 2*M_PI) - M_PI;
+        return torch::remainder(theta + M_PI, 2.*M_PI) - M_PI;
     }
 
 } // namespace env

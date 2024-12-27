@@ -9,17 +9,17 @@ namespace utils {
     public:
         // Task map to hold task registrations
         template <typename... Args>
-        static std::map<std::string, std::function<std::unique_ptr<env::Env>(Args...)>> task_map;
+        static std::map<string, std::function<std::unique_ptr<env::Env>(Args...)>> task_map;
 
         // Register task function
         template <typename... Args>
-        static void register_task(const std::string& task, std::function<std::unique_ptr<env::Env>(Args...)> fn) {
+        static void register_task(const string& task, std::function<std::unique_ptr<env::Env>(Args...)> fn) {
             task_map<Args...>[task] = fn;
         }
 
         // Create environment function
         template <typename... Args>
-        static std::unique_ptr<env::Env> create_env(const std::string& task, Args&&... args) {
+        static std::unique_ptr<env::Env> create_env(const string& task, Args&&... args) {
             auto it = task_map<Args...>.find(task);
             if (it != task_map<Args...>.end()) {
                 return it->second(std::forward<Args>(args)...);
@@ -30,7 +30,7 @@ namespace utils {
 
     // Definition of the static task_map outside the class template
     template <typename... Args>
-    std::map<std::string, std::function<std::unique_ptr<env::Env>(Args...)>> TaskManager::task_map;
+    std::map<string, std::function<std::unique_ptr<env::Env>(Args...)>> TaskManager::task_map;
 
     void register_eval_tasks() {
         // Register tasks

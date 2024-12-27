@@ -2,8 +2,6 @@
 
 #include <torch/torch.h>
 #include <string>
-#include <map>
-#include <optional>
 
 #include "utils/types.h"
 
@@ -12,15 +10,9 @@ namespace env {
     class Env {
     public:
 
-        // Constructors
-        Env(const Device& device): Env(1, device, this->sample_random_seed_()) {}
-
-        Env(const int& num_envs, const Device& device): Env(num_envs, device, this->sample_random_seed_()) {}
-
-        Env(const Device& device, const int& seed): Env(1, device, seed) {}
-
-        Env(const int& num_envs, const Device& device, const int& seed)
+        explicit Env(const Device& device, int seed = -1, const int& num_envs = 1)
             : num_envs_(num_envs), device_(device){
+            if (seed < 0) seed = this->sample_random_seed_();
             torch::manual_seed(seed);
             this->all_indices_ = torch::arange(0, num_envs).to(torch::kInt32).to(device);
         }

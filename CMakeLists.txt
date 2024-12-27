@@ -29,6 +29,7 @@ file(GLOB
     SOURCES 
     "src/main.cpp"
     "src/env/*.cpp"
+    "src/modules/*.cpp"
 )
 
 # Add the executable and all source files

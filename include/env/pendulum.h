@@ -1,10 +1,5 @@
 #pragma once
 
-#include <torch/torch.h>
-#include <iostream>
-#include <cmath>
-#include <vector>
-
 #include "utils/types.h"
 #include "env.h"
 
@@ -38,14 +33,14 @@ namespace env {
         int max_iterations_ = 200;
 
         float max_theta_init_ = M_PI;
-        float max_theta_dot_init_ = 1.F;
-        float max_theta_dot_ = 8.F;
-        float max_action_ = 2.F;
-        float dt_ = 0.05F;
+        float max_theta_dot_init_ = 1.;
+        float max_theta_dot_ = 8.;
+        float max_action_ = 2.;
+        float dt_ = 0.05;
 
-        float g_ = 10.F;
-        float m_ = 1.F;
-        float l_ = 1.F;
+        float g_ = 10.;
+        float m_ = 1.;
+        float l_ = 1.;
 
         Tensor applied_torque_;
     };
