@@ -31,14 +31,15 @@
             "id": "taskChoice",
             "type": "pickString",
             "description": "Choose task",
-            "options": ["train", "play"], // Choose between train or play
+            "options": ["train", "play"],
             "default": "play"
         },
         {
             "id": "taskName",
-            "type": "promptString",
-            "description": "Enter task name (e.g., pendulum)",
-            "default": "pendulum"
+            "type": "pickString",
+            "description": "Choose task name",
+            "options": ["pendulum"],
+            "default": "pendulum",
         }
     ]
 }
