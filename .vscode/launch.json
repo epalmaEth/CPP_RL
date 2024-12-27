@@ -6,7 +6,10 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/cpp_rl", // Path to the executable after build
-            "args": [],
+            "args": [
+                "${input:taskChoice}",
+                "${input:taskName}"
+            ],
             "stopAtEntry": false,
             "environment": [],
             "externalConsole": false,
@@ -21,6 +24,21 @@
                 }
             ],
             "preLaunchTask": "Build C++ Project", // This task will be executed before starting the debugger
+        }
+    ],
+    "inputs": [
+        {
+            "id": "taskChoice",
+            "type": "pickString",
+            "description": "Choose task",
+            "options": ["train", "play"], // Choose between train or play
+            "default": "play"
+        },
+        {
+            "id": "taskName",
+            "type": "promptString",
+            "description": "Enter task name (e.g., pendulum)",
+            "default": "pendulum"
         }
     ]
 }

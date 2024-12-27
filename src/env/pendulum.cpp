@@ -49,9 +49,9 @@ namespace env {
     void PendulumEnv::render(const DictListTensor& data) const {
 
         // Create directories if they do not exist
-        std::filesystem::create_directories("data/pendulum");
+        std::filesystem::create_directories("data/render/pendulum");
         // Open a file for writing the state values
-        std::ofstream file("data/pendulum/data.csv");
+        std::ofstream file("data/pendulum/render/data.csv");
 
         // Write a header with state, action, and reward columns
         file << "theta, theta_dot, action, reward" << std::endl;

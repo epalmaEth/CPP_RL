@@ -2,8 +2,7 @@
 
 set -e
 
-# Define workspace and build directories
-LIBTORCH_PATH="/third_party/libtorch"
+# Define workspace and build directoriess
 WORKSPACE_DIR="/workspace"
 BUILD_DIR="$WORKSPACE_DIR/build"
 
@@ -12,7 +11,7 @@ cd "$BUILD_DIR"
 
 # Configure the project with CMake
 echo "Running CMake configuration..."
-cmake -DCMAKE_PREFIX_PATH="$LIBTORCH_PATH" "$WORKSPACE_DIR"
+cmake "$WORKSPACE_DIR"
 
 # Build the project
 echo "Building the project..."

@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi-dev \
     libjpeg-dev \
     zlib1g-dev \
+    libyaml-cpp-dev \
     vim \
     ssh \
     gdb \
@@ -53,12 +54,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -L https://download.pytorch.org/libtorch/nightly/cu118/libtorch-cxx11-abi-shared-with-deps-latest.zip -o libtorch.zip && \
     unzip libtorch.zip -d third_party/ && \
     rm libtorch.zip
-
-# Install Eigen library (latest version)
-RUN cd /third_party && \
-    wget https://gitlab.com/libeigen/eigen/-/archive/master/eigen-master.tar.gz && \
-    tar -xvzf eigen-master.tar.gz && \
-    rm eigen-master.tar.gz
 
 # Install Python packages
 RUN pip3 install numpy matplotlib

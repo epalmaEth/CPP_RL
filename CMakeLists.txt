@@ -12,14 +12,21 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 # Set debug build
 set(CMAKE_BUILD_TYPE Debug)
 
-# Specify the path to libtorch directly
-set(Torch_DIR /third_party/libtorch/share/cmake/Torch)
+# Set the path to the packages
+set(CMAKE_PREFIX_PATH "/third_party/libtorch" ${CMAKE_PREFIX_PATH})
 
 # Find the Torch package
 find_package(Torch REQUIRED)
 
-# Set the path to Eigen headers (Eigen is header-only)
-include_directories(/third_party/eigen-master/Eigen)
+# Enable FetchContent module
+include(FetchContent)
+# Declare yaml-cpp dependency
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+  GIT_TAG "yaml-cpp-0.7.0"  # Replace with actual tag or commit hash
+)
+FetchContent_MakeAvailable(yaml-cpp)
 
 # Add include directories for your project
 include_directories(include)
@@ -36,8 +43,11 @@ file(GLOB
 add_executable(cpp_rl ${SOURCES})
 
 # Link third-party libraries
-target_link_libraries(cpp_rl "${TORCH_LIBRARIES}")
-
+target_link_libraries(cpp_rl 
+    PUBLIC 
+    "${TORCH_LIBRARIES}"
+    yaml-cpp::yaml-cpp
+)
 
 
 

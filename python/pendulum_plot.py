@@ -96,7 +96,7 @@ def save_animation(ani, filename):
 def main():
     """Main function to run the pendulum animation."""
     # Load the data
-    data = np.loadtxt('data/pendulum/data.csv', delimiter=',', skiprows=1)
+    data = np.loadtxt('data/render/pendulum/data.csv', delimiter=',', skiprows=1)
     theta, theta_dot, actions, rewards = data[:, 0], data[:, 1], data[:, 2], data[:, 3]
 
     # Set up the plot
