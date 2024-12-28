@@ -23,6 +23,9 @@ find "$SRC_DIR" "$INCLUDE_DIR" -type f \( -name '*.cpp' -o -name '*.h' \) | whil
         echo "Formatted: $file"
         # Apply the formatting changes
         mv "$temp_file" "$file"
+    else
+        # Remove the temporary file
+        rm "$temp_file"
     fi
 done
 echo "Running black..."
