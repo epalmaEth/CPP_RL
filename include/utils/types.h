@@ -1,6 +1,7 @@
 #pragma once
 
 #include <torch/torch.h>
+
 #include <map>
 #include <string>
 
@@ -20,9 +21,9 @@ using MLP = torch::nn::Sequential;
 
 // Env types
 struct StepResult {
-    Tensor observation;
-    Tensor reward;
-    Tensor terminated;
-    Tensor truncated;
-    DictTensor info;
+  Tensor observation;
+  Tensor reward;
+  Tensor terminated;
+  Tensor truncated;
+  DictTensor info;
 };
