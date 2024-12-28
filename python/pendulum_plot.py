@@ -17,7 +17,7 @@ def setup_plot():
     ax_main = plt.subplot2grid((10, 10), (0, 0), colspan=5, rowspan=10)
     ax_action = plt.subplot2grid((10, 10), (0, 5), colspan=5, rowspan=5)
     ax_reward = plt.subplot2grid((10, 10), (5, 5), colspan=5, rowspan=5)
-    plt.subplots_adjust(hspace=1.0, wspace=1.0)
+    plt.subplots_adjust(hspace=0.5, wspace=1.0)
     return fig, ax_main, ax_action, ax_reward
 
 
@@ -70,13 +70,12 @@ def setup_action_reward_axes(ax_action, ax_reward, actions, rewards):
     (action_line,) = ax_action.plot([], [], label="Action", color="green")
     ax_action.set_xlim(0, len(actions))
     ax_action.set_ylim(np.min(actions) - 0.1, np.max(actions) + 0.1)
-    ax_action.set_title("Action")
+    ax_action.set_xticks([])
     ax_action.legend()
 
     (reward_line,) = ax_reward.plot([], [], label="Reward", color="blue")
     ax_reward.set_xlim(0, len(rewards))
     ax_reward.set_ylim(np.min(rewards) - 0.1, np.max(rewards) + 0.1)
-    ax_reward.set_title("Reward")
     ax_reward.set_xlabel("Time Step")
     ax_reward.legend()
 
