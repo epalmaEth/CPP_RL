@@ -1,6 +1,7 @@
 #pragma once
 
 #include "distribution.h"
+#include "normalizer.h"
 #include "utils/types.h"
 
 namespace modules {
@@ -9,9 +10,10 @@ class Actor : public NNModule {
  public:
   Actor(const int& num_observations, const int& num_actions, const int& depth,
         const double& init_noise_std, const torch::nn::Functional& activation,
-        const string& distribution_type, const Device& device);
+        const string& normalizer_type, const string& distribution_type,
+        const Device& device);
 
-  Tensor forward(const Tensor& actor_observations, const bool& inference);
+  Tensor forward(const Tensor& actor_observations);
   Tensor get_mean() const { return this->distribution_->get_mean(); }
   Tensor get_std() const { return this->distribution_->get_std(); }
   Tensor get_log_prob(const Tensor& actions) const {
@@ -24,8 +26,12 @@ class Actor : public NNModule {
   DictTensor get_kl_params() const {
     return this->distribution_->get_kl_params();
   }
+  void train();
+  void eval();
 
  private:
+  bool inference_mode_ = false;
+  std::unique_ptr<Normalizer> normalizer_;
   MLP network_;
   std::shared_ptr<Distribution> distribution_;
 };
@@ -33,13 +39,16 @@ class Actor : public NNModule {
 class Critic : public NNModule {
  public:
   Critic(const int& num_observations, const int& depth,
-         const torch::nn::Functional& activation, const Device& device);
+         const torch::nn::Functional& activation, const string& normalizer_type,
+         const Device& device);
 
   Tensor forward(const Tensor& critic_observations) {
-    return this->network_->forward(critic_observations);
+    return this->network_->forward(
+        this->normalizer_->forward(critic_observations));
   };
 
  private:
+  std::unique_ptr<Normalizer> normalizer_;
   MLP network_;
 };
 
@@ -51,13 +60,17 @@ class ActorCritic : public NNModule {
               const Device& device,
               const torch::nn::Functional& activation_actor,
               const torch::nn::Functional& activation_critic,
-              const std::string& distribution_type = "normal")
+              const string& normalizer_type_actor,
+              const string& normalizer_type_critic,
+              const std::string& distribution_type)
       : actor_(num_actor_obs, num_actions, depth_actor, init_noise_std,
-               activation_actor, distribution_type, device),
-        critic_(num_critic_obs, depth_critic, activation_critic, device) {}
+               activation_actor, normalizer_type_actor, distribution_type,
+               device),
+        critic_(num_critic_obs, depth_critic, activation_critic,
+                normalizer_type_critic, device) {}
 
-  Tensor forward(const Tensor& actor_observations, const bool& inference) {
-    return this->actor_.forward(actor_observations, inference);
+  Tensor forward(const Tensor& actor_observations) {
+    return this->actor_.forward(actor_observations);
   }
   Tensor evaluate(const Tensor& critic_observations) {
     return this->critic_.forward(critic_observations);
@@ -74,6 +87,9 @@ class ActorCritic : public NNModule {
   DictTensor get_distribution_kl_params() const {
     return this->actor_.get_kl_params();
   }
+  std::function<Tensor(const Tensor&)> get_inference_policy();
+  void train() { this->actor_.train(); }
+  void eval() { this->actor_.eval(); }
 
  private:
   Actor actor_;

@@ -70,4 +70,20 @@ class Beta : public Distribution {
   Tensor alpha_;
   Tensor beta_;
 };
+
+class DistributionFactory {
+ public:
+  static std::shared_ptr<Distribution> create(
+      const std::string& distribution_type, const int& input_size,
+      const double& init_noise_std, const torch::Device& device) {
+    if (distribution_type == "normal") {
+      return std::make_shared<Normal>(input_size, init_noise_std, device);
+    } else if (distribution_type == "beta") {
+      return std::make_shared<Beta>(input_size, init_noise_std, device);
+    } else {
+      throw std::invalid_argument("Unknown distribution type: " +
+                                  distribution_type);
+    }
+  }
+};
 }  // namespace modules

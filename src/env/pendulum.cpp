@@ -71,13 +71,13 @@ void PendulumEnv::render(const DictListTensor& data) const {
     const Tensor& action = actions[i];
     const Tensor& reward = rewards[i];
 
-    const float theta =
-        state[0][0].item<float>();  // Assuming state is [theta, theta_dot]
-    const float theta_dot = state[0][1].item<float>();
-    const float action_value =
-        action[0].item<float>();  // Assuming action is a scalar value
-    const float reward_value =
-        reward[0].item<float>();  // Assuming reward is a scalar value
+    const double theta =
+        state[0][0].item<double>();  // Assuming state is [theta, theta_dot]
+    const double theta_dot = state[0][1].item<double>();
+    const double action_value =
+        action[0].item<double>();  // Assuming action is a scalar value
+    const double reward_value =
+        reward[0].item<double>();  // Assuming reward is a scalar value
 
     // Write state, action, and reward to the CSV file
     file << theta << "," << theta_dot << "," << action_value << ","

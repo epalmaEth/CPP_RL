@@ -32,15 +32,15 @@ class PendulumEnv : public Env {
 
   int max_iterations_ = 200;
 
-  float max_theta_init_ = M_PI;
-  float max_theta_dot_init_ = 1.;
-  float max_theta_dot_ = 8.;
-  float max_action_ = 2.;
-  float dt_ = 0.05;
+  double max_theta_init_ = M_PI;
+  double max_theta_dot_init_ = 1.;
+  double max_theta_dot_ = 8.;
+  double max_action_ = 2.;
+  double dt_ = 0.05;
 
-  float g_ = 10.;
-  float m_ = 1.;
-  float l_ = 1.;
+  double g_ = 10.;
+  double m_ = 1.;
+  double l_ = 1.;
 
   Tensor applied_torque_;
 };
