@@ -4,13 +4,11 @@
 
 namespace modules {
 
-using Slice = torch::indexing::Slice;
-
 void Normal::update(const Tensor& hidden_output) {
   this->mean_ = hidden_output;
 }
 
-Tensor Normal::get_sample() const {
+Tensor Normal::sample() const {
   return at::normal(this->mean_, this->std_.expand_as(this->mean_));
 }
 
@@ -54,7 +52,7 @@ void Beta::update(const Tensor& hidden_output) {
   this->beta_ = (1. - this->mean_) * total;
 }
 
-Tensor Beta::get_sample() const {
+Tensor Beta::sample() const {
   return at::_sample_dirichlet(
       torch::stack({this->alpha_, this->beta_}, /*dim=*/-1));
 }

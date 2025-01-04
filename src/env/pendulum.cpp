@@ -14,7 +14,7 @@ void PendulumEnv::initialize_states() {
   this->applied_torque_ = torch::zeros({this->num_envs_}).to(this->device_);
   this->iteration_ = torch::zeros({this->num_envs_}).to(this->device_);
   this->step_result_ = {
-      .observation = torch::zeros({this->num_envs_, 3}).to(this->device_),
+      .obs = torch::zeros({this->num_envs_, 3}).to(this->device_),
       .reward = torch::zeros({this->num_envs_}).to(this->device_),
       .terminated =
           torch::zeros({this->num_envs_}).to(torch::kBool).to(this->device_),
@@ -24,14 +24,13 @@ void PendulumEnv::initialize_states() {
 }
 
 std::pair<Tensor, DictTensor> PendulumEnv::reset(const Tensor& indices) {
-  if (indices.numel() > 0) {
+  if (indices.sum().item<int>() > 0) {
     this->sample_state_(indices);
     this->iteration_.index_put_({indices}, 0);
     this->compute_observations_();
     this->compute_info_();
   }
-  return std::make_pair(this->step_result_.observation,
-                        this->step_result_.info);
+  return std::make_pair(this->step_result_.obs, this->step_result_.info);
 }
 
 void PendulumEnv::close() {
@@ -71,13 +70,13 @@ void PendulumEnv::render(const DictListTensor& data) const {
     const Tensor& action = actions[i];
     const Tensor& reward = rewards[i];
 
-    const double theta =
-        state[0][0].item<double>();  // Assuming state is [theta, theta_dot]
-    const double theta_dot = state[0][1].item<double>();
-    const double action_value =
-        action[0].item<double>();  // Assuming action is a scalar value
-    const double reward_value =
-        reward[0].item<double>();  // Assuming reward is a scalar value
+    const float theta =
+        state[0][0].item<float>();  // Assuming state is [theta, theta_dot]
+    const float theta_dot = state[0][1].item<float>();
+    const float action_value =
+        action[0].item<float>();  // Assuming action is a scalar value
+    const float reward_value =
+        reward[0].item<float>();  // Assuming reward is a scalar value
 
     // Write state, action, and reward to the CSV file
     file << theta << "," << theta_dot << "," << action_value << ","
@@ -89,7 +88,7 @@ void PendulumEnv::render(const DictListTensor& data) const {
 
   // Running python script
   string command = "python3 python/pendulum_plot.py";
-  std::filesystem::create_directories("videos/pendulum");
+  std::filesystem::create_directories("data/videos/pendulum");
   std::system(command.c_str());
 }
 
@@ -128,11 +127,9 @@ void PendulumEnv::update_state_(const Tensor& action) {
 void PendulumEnv::compute_observations_() {
   const Tensor& theta = this->state_.index({this->all_indices_, 0});
   const Tensor& theta_dot = this->state_.index({this->all_indices_, 1});
-  this->step_result_.observation.index_put_({this->all_indices_, 0},
-                                            torch::cos(theta));
-  this->step_result_.observation.index_put_({this->all_indices_, 1},
-                                            torch::sin(theta));
-  this->step_result_.observation.index_put_({this->all_indices_, 2}, theta_dot);
+  this->step_result_.obs.index_put_({this->all_indices_, 0}, torch::cos(theta));
+  this->step_result_.obs.index_put_({this->all_indices_, 1}, torch::sin(theta));
+  this->step_result_.obs.index_put_({this->all_indices_, 2}, theta_dot);
 }
 
 void PendulumEnv::compute_reward_() {

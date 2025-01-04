@@ -1,9 +1,12 @@
 #pragma once
 
+#include "configs/configs.h"
 #include "torch/torch.h"
 #include "utils/types.h"
 
 namespace modules {
+
+using NormalizerCfg = configs::NormalizerCfg;
 
 class Normalizer : public torch::nn::Module {
  public:
@@ -38,10 +41,9 @@ class IdentityNormalizer : public Normalizer {
 
 class EmpiricalNormalizer : public Normalizer {
  public:
-  EmpiricalNormalizer(const int& num_observations, const Device& device)
-      : device_(device) {
-    this->mean_ = torch::zeros({num_observations}).to(device_);
-    this->var_ = torch::ones({num_observations}).to(device_);
+  EmpiricalNormalizer(const NormalizerCfg& cfg) {
+    this->mean_ = torch::zeros({cfg.num_inputs});
+    this->var_ = torch::ones({cfg.num_inputs});
 
     this->register_buffer("mean", this->mean_);
     this->register_buffer("var", this->var_);
@@ -53,8 +55,7 @@ class EmpiricalNormalizer : public Normalizer {
   Tensor denormalize(const Tensor& observations) const override;
 
  private:
-  int count_ = 0;
-  Device device_;
+  unsigned int count_ = 0;
 
   Tensor mean_;
   Tensor var_;
@@ -62,17 +63,11 @@ class EmpiricalNormalizer : public Normalizer {
 
 class NormalizerFactory {
  public:
-  static std::unique_ptr<Normalizer> create(const std::string& normalizer_type,
-                                            const int& num_observations,
-                                            const torch::Device& device) {
-    if (normalizer_type == "identity") {
-      return std::make_unique<IdentityNormalizer>();
-    } else if (normalizer_type == "empirical") {
-      return std::make_unique<EmpiricalNormalizer>(num_observations, device);
-    } else {
-      throw std::invalid_argument("Unknown normalizer type: " +
-                                  normalizer_type);
-    }
+  static std::shared_ptr<Normalizer> create(const NormalizerCfg& cfg) {
+    if (cfg.type == "identity") return std::make_shared<IdentityNormalizer>();
+    if (cfg.type == "empirical")
+      return std::make_shared<EmpiricalNormalizer>(cfg);
+    throw std::invalid_argument("Unknown normalizer type: " + cfg.type);
   }
 };
 

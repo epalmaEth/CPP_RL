@@ -14,7 +14,7 @@ class PendulumEnv : public Env {
   void initialize_states() override;
   std::pair<Tensor, DictTensor> reset(const Tensor& indices) override;
   void close() override;
-  int get_action_size() const override { return 1; }
+  unsigned int get_action_size() const override { return 1; }
   Tensor sample_action() const override;
   void update_render_data(DictListTensor& data) const override;
   void render(const DictListTensor& data) const override;
@@ -30,17 +30,17 @@ class PendulumEnv : public Env {
 
   Tensor normalized_theta_() const;
 
-  int max_iterations_ = 200;
+  unsigned int max_iterations_ = 200;
 
-  double max_theta_init_ = M_PI;
-  double max_theta_dot_init_ = 1.;
-  double max_theta_dot_ = 8.;
-  double max_action_ = 2.;
-  double dt_ = 0.05;
+  float max_theta_init_ = M_PI;
+  float max_theta_dot_init_ = 1.;
+  float max_theta_dot_ = 8.;
+  float max_action_ = 2.;
+  float dt_ = 0.05;
 
-  double g_ = 10.;
-  double m_ = 1.;
-  double l_ = 1.;
+  float g_ = 10.;
+  float m_ = 1.;
+  float l_ = 1.;
 
   Tensor applied_torque_;
 };

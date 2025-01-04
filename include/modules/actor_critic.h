@@ -1,19 +1,25 @@
 #pragma once
 
+#include "configs/configs.h"
 #include "distribution.h"
+#include "mlp.h"
 #include "normalizer.h"
 #include "utils/types.h"
 
 namespace modules {
 
+using NormalizerPointer = std::shared_ptr<Normalizer>;
+using MLPPointer = std::shared_ptr<MLP>;
+using DistributionPointer = std::shared_ptr<Distribution>;
+using ActorCfg = configs::ActorCfg;
+using CriticCfg = configs::CriticCfg;
+
 class Actor : public NNModule {
  public:
-  Actor(const int& num_observations, const int& num_actions, const int& depth,
-        const double& init_noise_std, const torch::nn::Functional& activation,
-        const string& normalizer_type, const string& distribution_type,
-        const Device& device);
+  Actor(const ActorCfg& cfg);
 
-  Tensor forward(const Tensor& actor_observations);
+  Tensor forward(const Tensor& actor_obs);
+  Tensor forward_inference(const Tensor& actor_obs);
   Tensor get_mean() const { return this->distribution_->get_mean(); }
   Tensor get_std() const { return this->distribution_->get_std(); }
   Tensor get_log_prob(const Tensor& actions) const {
@@ -31,68 +37,60 @@ class Actor : public NNModule {
 
  private:
   bool inference_mode_ = false;
-  std::unique_ptr<Normalizer> normalizer_;
-  MLP network_;
-  std::shared_ptr<Distribution> distribution_;
+  NormalizerPointer normalizer_ = nullptr;
+  MLPPointer network_ = nullptr;
+  DistributionPointer distribution_ = nullptr;
 };
 
 class Critic : public NNModule {
  public:
-  Critic(const int& num_observations, const int& depth,
-         const torch::nn::Functional& activation, const string& normalizer_type,
-         const Device& device);
+  Critic(const CriticCfg& cfg);
 
-  Tensor forward(const Tensor& critic_observations) {
-    return this->network_->forward(
-        this->normalizer_->forward(critic_observations));
+  Tensor forward(const Tensor& critic_obs) {
+    return this->network_->forward(this->normalizer_->forward(critic_obs));
   };
 
  private:
-  std::unique_ptr<Normalizer> normalizer_;
-  MLP network_;
+  NormalizerPointer normalizer_ = nullptr;
+  MLPPointer network_ = nullptr;
 };
+
+using ActorPointer = std::shared_ptr<Actor>;
+using CriticPointer = std::shared_ptr<Critic>;
 
 class ActorCritic : public NNModule {
  public:
-  ActorCritic(const int& num_actor_obs, const int& num_critic_obs,
-              const int& num_actions, const double& init_noise_std,
-              const int& depth_actor, const int& depth_critic,
-              const Device& device,
-              const torch::nn::Functional& activation_actor,
-              const torch::nn::Functional& activation_critic,
-              const string& normalizer_type_actor,
-              const string& normalizer_type_critic,
-              const std::string& distribution_type)
-      : actor_(num_actor_obs, num_actions, depth_actor, init_noise_std,
-               activation_actor, normalizer_type_actor, distribution_type,
-               device),
-        critic_(num_critic_obs, depth_critic, activation_critic,
-                normalizer_type_critic, device) {}
+  ActorCritic(const ActorCfg& actor_cfg, const CriticCfg& critic_cfg);
 
-  Tensor forward(const Tensor& actor_observations) {
-    return this->actor_.forward(actor_observations);
+  Tensor forward(const Tensor& actor_obs) {
+    return this->actor_->forward(actor_obs);
   }
-  Tensor evaluate(const Tensor& critic_observations) {
-    return this->critic_.forward(critic_observations);
+  Tensor evaluate(const Tensor& critic_obs) {
+    return this->critic_->forward(critic_obs);
   }
-  Tensor get_action_mean() const { return this->actor_.get_mean(); }
-  Tensor get_action_std() const { return this->actor_.get_std(); }
+  Tensor get_action_mean() const { return this->actor_->get_mean(); }
+  Tensor get_action_std() const { return this->actor_->get_std(); }
   Tensor get_actions_log_prob(const Tensor& actions) const {
-    return this->actor_.get_log_prob(actions).sum(-1);
+    return this->actor_->get_log_prob(actions).sum(/*dim=*/-1,
+                                                   /*keepdim=*/true);
   }
-  Tensor get_entropy() const { return this->actor_.get_entropy().sum(-1); }
+  Tensor get_entropy() const { return this->actor_->get_entropy().sum(-1); }
   Tensor get_kl(const DictTensor& old_kl_params) const {
-    return this->actor_.get_kl(old_kl_params);
+    return this->actor_->get_kl(old_kl_params);
   }
   DictTensor get_distribution_kl_params() const {
-    return this->actor_.get_kl_params();
+    return this->actor_->get_kl_params();
   }
-  std::function<Tensor(const Tensor&)> get_inference_policy();
-  void train() { this->actor_.train(); }
-  void eval() { this->actor_.eval(); }
+  std::function<Tensor(const Tensor&)> get_inference_policy() const {
+    return [this](const Tensor& actor_obs) {
+      return this->actor_->forward_inference(actor_obs);
+    };
+  }
+  void train() { this->actor_->train(); }
+  void eval() { this->actor_->eval(); }
 
  private:
-  Actor actor_;
-  Critic critic_;
+  ActorPointer actor_ = nullptr;
+  CriticPointer critic_ = nullptr;
 };
 }  // namespace modules

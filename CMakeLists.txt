@@ -15,16 +15,16 @@ set(CMAKE_BUILD_TYPE Debug)
 # Set the path to the packages
 set(CMAKE_PREFIX_PATH "/third_party/libtorch" ${CMAKE_PREFIX_PATH})
 
-# Find the Torch package
 find_package(Torch REQUIRED)
 
 # Enable FetchContent module
 include(FetchContent)
-# Declare yaml-cpp dependency
+
+# yaml-cpp
 FetchContent_Declare(
   yaml-cpp
   GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-  GIT_TAG "yaml-cpp-0.7.0"  # Replace with actual tag or commit hash
+  GIT_TAG "yaml-cpp-0.7.0"
 )
 FetchContent_MakeAvailable(yaml-cpp)
 
@@ -35,8 +35,12 @@ include_directories(include)
 file(GLOB 
     SOURCES 
     "src/main.cpp"
+    "src/algorithms/*.cpp"
     "src/env/*.cpp"
     "src/modules/*.cpp"
+    "src/runners/*.cpp"
+    "src/storage/*.cpp"
+    "src/utils/*.cpp"
 )
 
 # Add the executable and all source files

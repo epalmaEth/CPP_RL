@@ -6,33 +6,27 @@
 
 namespace modules {
 
-Actor::Actor(const int& num_observations, const int& num_actions,
-             const int& depth, const double& init_noise_std,
-             const torch::nn::Functional& activation,
-             const string& normalizer_type, const string& distribution_type,
-             const Device& device) {
-  this->normalizer_ =
-      NormalizerFactory::create(normalizer_type, num_observations, device);
+Actor::Actor(const ActorCfg& cfg) {
+  this->normalizer_ = NormalizerFactory::create(cfg.normalizer_cfg);
+  this->network_ = std::make_shared<MLP>(cfg.mlp_cfg);
+  this->distribution_ = DistributionFactory::create(cfg.distribution_cfg);
 
-  const int& width = utils::next_power_of_2(num_observations);
-  this->network_ = utils::create_MLP(num_observations, num_actions, width,
-                                     depth, activation);
-
-  this->distribution_ = DistributionFactory::create(
-      distribution_type, num_actions, init_noise_std, device);
-
-  this->network_->to(device);
+  this->register_module("normalizer", this->normalizer_);
   this->register_module("network", this->network_);
   this->register_module("distribution", this->distribution_);
-
-  std::cout << "Actor MLP: " << this->network_ << std::endl;
 }
 
-Tensor Actor::forward(const Tensor& actor_observations) {
+Tensor Actor::forward(const Tensor& actor_obs) {
   this->distribution_->update(
-      this->network_->forward(this->normalizer_->forward(actor_observations)));
+      this->network_->forward(this->normalizer_->forward(actor_obs)));
   if (this->inference_mode_) return this->distribution_->get_mode();
-  return this->distribution_->get_sample();
+  return this->distribution_->sample();
+}
+
+Tensor Actor::forward_inference(const Tensor& actor_obs) {
+  this->distribution_->update(
+      this->network_->forward(this->normalizer_->forward(actor_obs)));
+  return this->distribution_->get_mode();
 }
 
 void Actor::train() {
@@ -47,26 +41,24 @@ void Actor::eval() {
   this->network_->eval();
 }
 
-Critic::Critic(const int& num_observations, const int& depth,
-               const torch::nn::Functional& activation,
-               const string& normalizer_type, const Device& device) {
-  this->normalizer_ =
-      NormalizerFactory::create(normalizer_type, num_observations, device);
+Critic::Critic(const CriticCfg& cfg) {
+  this->normalizer_ = NormalizerFactory::create(cfg.normalizer_cfg);
 
-  const int& width = utils::next_power_of_2(num_observations);
-  this->network_ =
-      utils::create_MLP(num_observations, 1, width, depth, activation);
+  this->network_ = std::make_shared<MLP>(cfg.mlp_cfg);
 
-  this->network_->to(device);
+  this->register_module("normalizer", this->normalizer_);
   this->register_module("network", this->network_);
-
-  std::cout << "Critic MLP: " << this->network_ << std::endl;
 }
 
-std::function<Tensor(const Tensor&)> ActorCritic::get_inference_policy() {
-  this->eval();
-  return [this](const Tensor& actor_observations) {
-    return this->forward(actor_observations);
-  };
+ActorCritic::ActorCritic(const ActorCfg& actor_cfg,
+                         const CriticCfg& critic_cfg) {
+  this->actor_ = std::make_shared<Actor>(actor_cfg);
+  this->critic_ = std::make_shared<Critic>(critic_cfg);
+
+  this->register_module("actor", this->actor_);
+  this->register_module("critic", this->critic_);
+
+  std::cout << "Actor: \n" << *this->actor_ << std::endl;
+  std::cout << "Critic: \n" << *this->critic_ << std::endl;
 }
 }  // namespace modules

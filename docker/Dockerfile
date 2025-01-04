@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ssh \
     gdb \
     ffmpeg \
+    clang-format \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install a compatible GCC version (11 for LIBTorch with CUDA 11.8)
@@ -56,10 +57,9 @@ RUN curl -L https://download.pytorch.org/libtorch/nightly/cu118/libtorch-cxx11-a
     rm libtorch.zip
 
 # Install Python packages
-RUN pip3 install numpy matplotlib
-
-# Set default working directory
-WORKDIR /workspace
+RUN pip3 install numpy matplotlib black
 
 USER epalma
 
+# Set default working directory
+WORKDIR /workspace

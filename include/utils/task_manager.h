@@ -5,46 +5,41 @@
 #include "utils/types.h"
 
 namespace utils {
+
+using EnvPointer = std::shared_ptr<env::Env>;
+
 class TaskManager {
  public:
-  // Task map to hold task registrations
-  template <typename... Args>
-  static std::map<string, std::function<std::unique_ptr<env::Env>(Args...)>>
-      task_map;
+  TaskManager() { this->register_basic_tasks_(); }
 
-  // Register task function
-  template <typename... Args>
-  static void register_task(
-      const string& task,
-      std::function<std::unique_ptr<env::Env>(Args...)> fn) {
-    task_map<Args...>[task] = fn;
+  void register_task(const string& task,
+                     const std::function<EnvPointer(
+                         const unsigned int&, const int&, const Device&)>& fn) {
+    tasks_[task] = fn;
   }
 
-  // Create environment function
-  template <typename... Args>
-  static std::unique_ptr<env::Env> create_env(const string& task,
-                                              Args&&... args) {
-    auto it = task_map<Args...>.find(task);
-    if (it != task_map<Args...>.end()) {
-      return it->second(std::forward<Args>(args)...);
-    }
-    return nullptr;
+  EnvPointer create_env(const string& task, const unsigned int& num_envs,
+                        const int& seed, const Device& device) {
+    if (tasks_.find(task) == tasks_.end())
+      throw std::runtime_error("Task not found: " + task);
+    return tasks_[task](num_envs, seed, device);
   }
+
+ private:
+  void register_basic_tasks_() {
+    this->register_task(
+        "pendulum", std::function<EnvPointer(const unsigned int&, const int&,
+                                             const Device&)>(
+                        [](const unsigned int& num_envs, const int& seed,
+                           const Device& device) {
+                          return std::make_shared<env::PendulumEnv>(
+                              num_envs, seed, device);
+                        }));
+  }
+
+  std::unordered_map<
+      string,
+      std::function<EnvPointer(const unsigned int&, const int&, const Device&)>>
+      tasks_;
 };
-
-// Definition of the static task_map outside the class template
-template <typename... Args>
-std::map<string, std::function<std::unique_ptr<env::Env>(Args...)>>
-    TaskManager::task_map;
-
-void register_eval_tasks() {
-  // Register tasks
-  TaskManager::register_task<const Device&, const int&>(
-      "pendulum",
-      std::function<std::unique_ptr<env::Env>(const Device&, const int&)>(
-          [](const Device& device, const int& seed) {
-            return std::make_unique<env::PendulumEnv>(device, seed);
-          }));
-}
-
 }  // namespace utils

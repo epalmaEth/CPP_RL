@@ -164,7 +164,7 @@ def main():
     )
 
     # Save the animation
-    save_animation(ani, "videos/pendulum/pendulum_motion.mp4")
+    save_animation(ani, "data/videos/pendulum/pendulum_motion.mp4")
 
 
 if __name__ == "__main__":
