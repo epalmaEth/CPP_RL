@@ -1,0 +1,73 @@
+{
+    "name": "cpp_rl",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/${localEnv:USER}/CPP_RL,type=bind",
+    "initializeCommand": ".devcontainer/initCommand.bash",
+    "postCreateCommand": "/home/${localEnv:USER}/CPP_RL/.devcontainer/build.bash",
+    "image": "devcontainer:cpp_rl",
+    "remoteUser": "${localEnv:USER}",
+    "runArgs": [
+        "--hostname",
+        "${localEnv:HOSTNAME}",
+        "--network=host",
+        "--ulimit",
+        "rtprio=99",
+        "--ulimit",
+        "core=-1",
+        "--privileged",
+        "--gpus=all",
+        "--runtime=nvidia",
+        "-e",
+        "NVIDIA_VISIBLE_DEVICES=all",
+        "-e",
+        "NVIDIA_DRIVER_CAPABILITIES=all",
+        "-e",
+        "QT_X11_NO_MITSHM=1",
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined",
+        "-e",
+        "HOST_IP=$(hostname -I | awk '{print $1}')",
+        "--name",
+        "devcontainer_cpp_rl"
+    ],
+    "remoteEnv": {
+        "DISPLAY": ":1",
+        "QT_X11_NO_MITSHM": "1",
+        "NVIDIA_VISIBLE_DEVICES": "all",
+        "NVIDIA_DRIVER_CAPABILITIES": "all"
+    },
+    "mounts": [
+        // SSH configuration
+        "source=${localEnv:HOME}/.ssh,target=/home/${localEnv:USER}/.ssh,type=bind",
+        // Support running GUIs inside the container.
+        "source=/tmp/.X11-unix/,target=/tmp/.X11-unix/,type=bind",
+        // Docker in Docker
+        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+        // .fzf
+        "source=${localEnv:HOME}/.fzf,target=/home/${localEnv:USER}/.fzf,type=bind",
+        // local time setting
+        "source=/etc/localtime,target=/etc/localtime,type=bind"
+    ],
+    "workspaceFolder": "/home/${localEnv:USER}/CPP_RL",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.remote-containers",
+                "github.copilot",
+                "github.copilot-chat",
+                "ms-python.debugpy",
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.black-formatter",
+                "ms-vscode.cmake-tools",
+                "ms-vscode.cpptools-extension-pack",
+                "xaver.clang-format",
+                "jbenden.c-cpp-flylint"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.shell.linux": "/bin/bash"
+            }
+        }
+    }
+}

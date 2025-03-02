@@ -7,17 +7,16 @@
 
 namespace modules {
 
-using MLPCfg = configs::MLPCfg;
-
-class MLP : public torch::nn::Module {
+class MLP : public NNModule {
  public:
-  MLP(const MLPCfg& cfg);
+  explicit MLP(const configs::MLPCfg& cfg);
 
-  Tensor forward(const Tensor& x) { return this->network_->forward(x); }
+  const Tensor forward(const Tensor& x) { return this->network_->forward(x); }
 
  private:
-  void add_activation_(const std::string& activation);
-  NN network_ = nullptr;
+  void add_activation_(const string& activation);
+  NN network_;
 };
 
+using MLPPointer = std::shared_ptr<MLP>;
 }  // namespace modules

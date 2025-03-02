@@ -4,13 +4,14 @@
 #include <numeric>
 #include <vector>
 
-namespace utils {
+namespace storage {
 
 template <typename T>
 class CircularBuffer {
  public:
-  explicit CircularBuffer(size_t max_len_)
-      : max_len_(max_len_), head_(0), tail_(0), full_(false) {
+  CircularBuffer() : max_len_(0), head_(0), tail_(0), full_(true) {}
+
+  explicit CircularBuffer(size_t max_len_) : max_len_(max_len_), head_(0), tail_(0), full_(false) {
     this->buffer_.resize(this->max_len_);
   }
 
@@ -21,20 +22,34 @@ class CircularBuffer {
     this->full_ = this->head_ == this->tail_;
   }
 
+  void push(const std::vector<T>& values) {
+    for (const auto& value : values) {
+      this->push(value);
+    }
+  }
+
   size_t size() const {
     if (this->full_) return this->max_len_;
     if (this->head_ >= this->tail_) return this->head_ - this->tail_;
     return this->max_len_ + this->head_ - this->tail_;
   }
 
-  T mean() const {
-    if (size() == 0) throw std::runtime_error("Buffer is empty.");
+  float mean() const {
+    if (size() == 0) return 0.0;
+
+    float sum;
     if (this->full_)
-      return std::accumulate(this->buffer_.begin(), this->buffer_.end(), T(0)) /
-             size();
-    return std::accumulate(this->buffer_.begin() + this->tail_,
-                           this->buffer_.begin() + this->head_, T(0)) /
-           size();
+      sum = static_cast<float>(std::accumulate(this->buffer_.begin(), this->buffer_.end(), T(0)));
+    else
+      sum = static_cast<float>(std::accumulate(this->buffer_.begin() + this->tail_,
+                                               this->buffer_.begin() + this->head_, T(0)));
+    return sum / size();
+  }
+
+  void clear() {
+    this->head_ = 0;
+    this->tail_ = 0;
+    this->full_ = false;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const CircularBuffer& cb) {
@@ -61,4 +76,7 @@ class CircularBuffer {
 using CircularBufferFloat = CircularBuffer<float>;
 using CircularBufferInt = CircularBuffer<int>;
 
-}  // namespace utils
+using CircularBufferFloatPointer = std::unique_ptr<CircularBufferFloat>;
+using CircularBufferIntPointer = std::unique_ptr<CircularBufferInt>;
+
+}  // namespace storage

@@ -1,55 +1,57 @@
 #pragma once
 
+#include <tensorboard_logger.h>
+
 #include "algorithms/ppo.h"
 #include "configs/configs.h"
 #include "env/env.h"
+#include "metrics.h"
 #include "modules/actor_critic.h"
+#include "storage/circular_buffer.h"
+#include "storage/observation_buffer.h"
 #include "utils/types.h"
 
 namespace runners {
 
-using Cfg = configs::Cfg;
-using EnvPointer = std::shared_ptr<env::Env>;
-using PPOPointer = std::unique_ptr<algorithms::PPO>;
-
-struct TrainMetric {
-  std::map<string, float> values;
-  std::map<string, float> extra_values;
-};
+using TensorBoardLoggerPointer = std::unique_ptr<TensorBoardLogger>;
 
 class OnPolicyRunner {
  public:
-  OnPolicyRunner(const EnvPointer &env, Cfg &cfg, const Device &device);
+  OnPolicyRunner(const string& task, const configs::CfgPointer& cfg, const Device& device);
 
   void learn();
-  void save_models(const string &name) const;
-  void load_models(const string &name, const bool &load_optimizer = false);
-  std::function<Tensor(const Tensor &)> get_inference_policy() {
+  void play();
+  void save_models(const string& name) const;
+  void load_models(const string& name, const bool& load_optimizer = false);
+  const std::function<Tensor(const Tensor&)> get_inference_policy() const {
     return this->train_algorithm_->get_inference_policy();
   }
 
  private:
   void update_cfg_();
-  void log_metrics_() const;
-  void train_() { this->train_algorithm_->train(); };
-  void eval_() { this->train_algorithm_->eval(); };
+  void initialize_();
+  void log_metric_(const TrainMetrics& metric) const;
+  void train_() { this->train_algorithm_->train(); }
+  void eval_() { this->train_algorithm_->eval(); }
 
-  Device device_;
-  Cfg cfg_;
-  EnvPointer env_ = nullptr;
-  PPOPointer train_algorithm_ = nullptr;
-  std::vector<TrainMetric> metrics_;
+  const configs::CfgPointer cfg_;
+  env::EnvPointer env_;
+  storage::ObservationBufferPointer observation_buffer_;
+  algorithms::PPOPointer train_algorithm_;
+  storage::CircularBufferFloatPointer reward_buffer_;
+  storage::CircularBufferIntPointer length_buffer_;
+  TensorBoardLoggerPointer logger_;
 
-  unsigned int tot_time_steps_ = 0;
-  unsigned int tot_time = 0;
+  const Device device_;
+  env::Results env_results_;
+  Tensor current_reward_sum_;
+  Tensor current_episode_length_;
+  float collection_time_ = 0.;
+  float learn_time_ = 0.;
+  float total_time_ = 0.;
+  unsigned int total_time_steps_ = 0;
   unsigned int current_learning_iteration_ = 0;
 };
 
-inline void print_metric(const std::string &name, const double value,
-                         const std::string &unit = "") {
-  const int pad = 35;  // Padding for alignment
-  std::cout << std::left << std::setw(pad) << name << ":" << std::right
-            << std::setw(pad) << value << unit << std::endl;
-}
-
+using RunnerPointer = std::unique_ptr<OnPolicyRunner>;
 }  // namespace runners

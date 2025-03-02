@@ -1,0 +1,53 @@
+env:
+  num_envs: 128
+  seed: 0
+  max_iterations: 500
+  # -- Physics based env
+  integrator: "rk4" # {"euler", "rk2", "rk4"}
+  dt: 0.02
+runner:
+  # -- Learning
+  max_iterations: 50000  # number of policy updates
+  num_steps_per_env: 32
+  observation_memory_length: 1
+  observation_memory_store_action: false
+  # -- Saving
+  save_interval: 100000000
+  # -- Logging
+  logging_buffer: 100 # circular buffer size
+  logging_warmup: 100 # tensorboard warmup
+ppo:
+  # -- Value loss 
+  value_loss_coef: 1.0
+  clip_param: 0.2
+  use_clipped_value_loss: true
+  # -- Surrogate loss
+  desired_kl: 0.01
+  entropy_coef: 0. #0.01
+  gamma: 0.99
+  lam: 0.95
+  max_grad_norm: 1.0
+  # -- Training
+  learning_rate: 0.001
+  min_learning_rate: 1e-06
+  max_learning_rate: 1e-02
+  num_epochs: 2
+  num_batches: 8
+  learning_rate_schedule: "adaptive" # {"adaptive", "fixed"}
+actor:
+  normalizer:
+    type: "identity" # {"identity", "empirical"}
+  mlp:
+    width: 2 # i-th next power of 2 
+    depth: 2
+    activation: "elu" # {"elu", "relu", "tanh", "sigmoid"}
+  distribution:
+    init_noise_std: 2.0
+    type: "normal" # {"normal", "beta"}
+critic:
+  normalizer:
+    type: "identity" # {"identity", "empirical"}
+  mlp:
+    width: 2 # i-th next power of 2 
+    depth: 2
+    activation: "elu" # {"elu", "relu", "tanh", "sigmoid"}

@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch C++ App with CMake Build",
+            "name": "Launch C++ App",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/cpp_rl", // Path to the executable after build
@@ -18,12 +18,12 @@
             "cwd": "${workspaceFolder}",
             "setupCommands": [
                 {
-                  "description": "Enable pretty-printing for gdb",
-                  "text": "-enable-pretty-printing",
-                  "ignoreFailures": true
-                }
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
             ],
-            "preLaunchTask": "Build C++ Project", // This task will be executed before starting the debugger
+            "preLaunchTask": "Build C++ Project" // This task will be executed before starting the debugger
         }
     ],
     "inputs": [
@@ -31,16 +31,21 @@
             "id": "taskChoice",
             "type": "pickString",
             "description": "Choose task",
-            "options": ["train", "play"],
-            "default": "play"
+            "options": [
+                "train",
+                "play"
+            ],
+            "default": "train"
         },
         {
             "id": "taskName",
             "type": "pickString",
             "description": "Choose task name",
-            "options": ["pendulum"],
+            "options": [
+                "pendulum",
+                "pendulum_cart"
+            ],
             "default": "pendulum",
         }
     ]
 }
-  

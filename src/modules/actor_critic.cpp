@@ -2,11 +2,13 @@
 
 #include <iostream>
 
+#include "modules/distributions/factory.h"
+#include "modules/normalizers/factory.h"
 #include "utils/utils.h"
 
 namespace modules {
 
-Actor::Actor(const ActorCfg& cfg) {
+Actor::Actor(const configs::ActorCfg& cfg) {
   this->normalizer_ = NormalizerFactory::create(cfg.normalizer_cfg);
   this->network_ = std::make_shared<MLP>(cfg.mlp_cfg);
   this->distribution_ = DistributionFactory::create(cfg.distribution_cfg);
@@ -16,16 +18,14 @@ Actor::Actor(const ActorCfg& cfg) {
   this->register_module("distribution", this->distribution_);
 }
 
-Tensor Actor::forward(const Tensor& actor_obs) {
-  this->distribution_->update(
-      this->network_->forward(this->normalizer_->forward(actor_obs)));
+const Tensor Actor::forward(const Tensor& actor_obs) {
+  this->distribution_->update(this->network_->forward(this->normalizer_->forward(actor_obs)));
   if (this->inference_mode_) return this->distribution_->get_mode();
   return this->distribution_->sample();
 }
 
-Tensor Actor::forward_inference(const Tensor& actor_obs) {
-  this->distribution_->update(
-      this->network_->forward(this->normalizer_->forward(actor_obs)));
+const Tensor Actor::forward_inference(const Tensor& actor_obs) {
+  this->distribution_->update(this->network_->forward(this->normalizer_->forward(actor_obs)));
   return this->distribution_->get_mode();
 }
 
@@ -41,7 +41,7 @@ void Actor::eval() {
   this->network_->eval();
 }
 
-Critic::Critic(const CriticCfg& cfg) {
+Critic::Critic(const configs::CriticCfg& cfg) {
   this->normalizer_ = NormalizerFactory::create(cfg.normalizer_cfg);
 
   this->network_ = std::make_shared<MLP>(cfg.mlp_cfg);
@@ -50,8 +50,7 @@ Critic::Critic(const CriticCfg& cfg) {
   this->register_module("network", this->network_);
 }
 
-ActorCritic::ActorCritic(const ActorCfg& actor_cfg,
-                         const CriticCfg& critic_cfg) {
+ActorCritic::ActorCritic(const configs::ActorCfg& actor_cfg, const configs::CriticCfg& critic_cfg) {
   this->actor_ = std::make_shared<Actor>(actor_cfg);
   this->critic_ = std::make_shared<Critic>(critic_cfg);
 
